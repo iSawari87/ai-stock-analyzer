@@ -37,17 +37,35 @@ export default function Home() {
         <section className="rounded-3xl border border-white/10 bg-slate-950/70 p-4 shadow-lg shadow-black/30">
           <div className="mb-4 flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-semibold">NVDA Chart</h2>
+              <h2 className="text-lg font-semibold">NVDA Charts</h2>
               <p className="text-sm text-slate-400">TradingView overview</p>
             </div>
           </div>
-          <div className="overflow-hidden rounded-2xl border border-white/10">
-            <iframe
-              title="NVDA TradingView Chart"
-              src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_nvda&symbol=NASDAQ%3ANVDA&interval=15&theme=dark&style=1&locale=en&toolbarbg=transparent&studies=%5B%5D"
-              className="h-[420px] w-full"
-              loading="lazy"
-            />
+          <div className="grid gap-4 lg:grid-cols-3">
+            <div className="overflow-hidden rounded-2xl border border-white/10">
+              <iframe
+                title="NVDA 5-Minute TradingView Chart"
+                src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_nvda_5m&symbol=NASDAQ%3ANVDA&interval=5&theme=dark&style=1&locale=en&toolbarbg=transparent&studies=%5B%5D"
+                className="h-[320px] w-full"
+                loading="lazy"
+              />
+            </div>
+            <div className="overflow-hidden rounded-2xl border border-white/10">
+              <iframe
+                title="NVDA 15-Minute TradingView Chart"
+                src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_nvda_15m&symbol=NASDAQ%3ANVDA&interval=15&theme=dark&style=1&locale=en&toolbarbg=transparent&studies=%5B%5D"
+                className="h-[320px] w-full"
+                loading="lazy"
+              />
+            </div>
+            <div className="overflow-hidden rounded-2xl border border-white/10">
+              <iframe
+                title="NVDA 1-Hour TradingView Chart"
+                src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_nvda_1h&symbol=NASDAQ%3ANVDA&interval=60&theme=dark&style=1&locale=en&toolbarbg=transparent&studies=%5B%5D"
+                className="h-[320px] w-full"
+                loading="lazy"
+              />
+            </div>
           </div>
         </section>
 

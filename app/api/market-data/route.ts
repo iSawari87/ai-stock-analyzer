@@ -29,6 +29,23 @@ function buildPlaceholderResponse(status: string, message: string) {
   };
 }
 
+function calculateEMA(values: number[], period: number) {
+  if (values.length < period) {
+    return null;
+  }
+
+  const initialAverage = values.slice(0, period).reduce((sum, value) => sum + value, 0) / period;
+  const multiplier = 2 / (period + 1);
+
+  let ema = initialAverage;
+
+  for (let index = period; index < values.length; index += 1) {
+    ema = (values[index] * multiplier) + (ema * (1 - multiplier));
+  }
+
+  return ema;
+}
+
 async function fetchTimeframeData(timeframe: TimeframeKey) {
   const apiKey = process.env.TWELVE_DATA_API_KEY?.trim();
 
@@ -51,16 +68,23 @@ async function fetchTimeframeData(timeframe: TimeframeKey) {
   }
 
   const payload = await response.json();
-  const latest = payload?.values?.[0];
+  const values = Array.isArray(payload?.values) ? payload.values : [];
+  const latest = values[0];
 
   if (!latest) {
     throw new Error("Twelve Data returned no market data values.");
   }
 
+  const closes = values
+    .map((entry: { close?: string | number | null }) => Number(entry.close))
+    .filter((value: number) => Number.isFinite(value));
+
   const close = Number(latest.close);
   const open = Number(latest.open);
   const high = Number(latest.high);
   const low = Number(latest.low);
+  const ema9 = calculateEMA(closes, 9);
+  const ema21 = calculateEMA(closes, 21);
 
   return {
     timeframe,
@@ -69,8 +93,8 @@ async function fetchTimeframeData(timeframe: TimeframeKey) {
       trend: close >= open ? "Bullish" : "Bearish",
       support: Number.isFinite(low) ? low : null,
       resistance: Number.isFinite(high) ? high : null,
-      ema9: null,
-      ema21: null,
+      ema9: Number.isFinite(ema9 ?? NaN) ? ema9 : null,
+      ema21: Number.isFinite(ema21 ?? NaN) ? ema21 : null,
       rsi: null,
       aiSignal: close >= open ? "Bullish bias" : "Bearish bias",
     },

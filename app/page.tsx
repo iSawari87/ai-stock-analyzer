@@ -1,20 +1,52 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
 const timeframes = [
   { label: "5m", accent: "from-cyan-500 to-blue-600" },
   { label: "15m", accent: "from-violet-500 to-fuchsia-600" },
   { label: "1h", accent: "from-emerald-500 to-lime-600" },
 ];
 
-const metrics = [
-  { label: "Trend", value: "—" },
-  { label: "Support", value: "—" },
-  { label: "Resistance", value: "—" },
-  { label: "EMA 9", value: "—" },
-  { label: "EMA 21", value: "—" },
-  { label: "RSI", value: "—" },
-  { label: "AI Signal", value: "—" },
-];
+type MarketFrameData = {
+  price?: number | null;
+  trend?: string | null;
+  support?: number | null;
+  resistance?: number | null;
+};
+
+function formatMetricValue(value: number | null | undefined) {
+  return typeof value === "number" ? value.toFixed(2) : "—";
+}
 
 export default function Home() {
+  const [marketData, setMarketData] = useState<Record<string, MarketFrameData>>({});
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadMarketData() {
+      try {
+        const response = await fetch("/api/market-data");
+        const data = await response.json();
+
+        if (isMounted) {
+          setMarketData(data.timeframes ?? {});
+        }
+      } catch {
+        if (isMounted) {
+          setMarketData({});
+        }
+      }
+    }
+
+    loadMarketData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(34,211,238,0.12),_transparent_35%),linear-gradient(135deg,_#050816_0%,_#02040a_100%)] px-4 py-8 text-white sm:px-6 lg:px-8">
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
@@ -84,15 +116,30 @@ export default function Home() {
               </div>
 
               <div className="mt-5 space-y-3">
-                {metrics.map((metric) => (
-                  <div
-                    key={`${timeframe.label}-${metric.label}`}
-                    className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-3 py-3"
-                  >
-                    <span className="text-sm text-slate-300">{metric.label}</span>
-                    <span className="text-sm font-medium text-slate-100">{metric.value}</span>
-                  </div>
-                ))}
+                <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-3 py-3">
+                  <span className="text-sm text-slate-300">Price</span>
+                  <span className="text-sm font-medium text-slate-100">
+                    {formatMetricValue(marketData[timeframe.label]?.price)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-3 py-3">
+                  <span className="text-sm text-slate-300">Trend</span>
+                  <span className="text-sm font-medium text-slate-100">
+                    {marketData[timeframe.label]?.trend ?? "—"}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-3 py-3">
+                  <span className="text-sm text-slate-300">Support</span>
+                  <span className="text-sm font-medium text-slate-100">
+                    {formatMetricValue(marketData[timeframe.label]?.support)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-3 py-3">
+                  <span className="text-sm text-slate-300">Resistance</span>
+                  <span className="text-sm font-medium text-slate-100">
+                    {formatMetricValue(marketData[timeframe.label]?.resistance)}
+                  </span>
+                </div>
               </div>
 
               <div className="mt-5 rounded-2xl border border-dashed border-slate-700 bg-slate-900/70 p-3 text-center text-sm text-slate-400">

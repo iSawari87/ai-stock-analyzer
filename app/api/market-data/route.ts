@@ -26,6 +26,9 @@ function buildPlaceholderResponse(status: string, message: string) {
         macdLine: null,
         macdSignal: null,
         macdHistogram: null,
+        bollingerUpper: null,
+        bollingerMiddle: null,
+        bollingerLower: null,
         aiSignal: null,
       }]),
     ),
@@ -125,6 +128,26 @@ function calculateMACD(values: number[]) {
   };
 }
 
+function calculateBollingerBands(values: number[]) {
+  if (values.length < 20) {
+    return null;
+  }
+
+  const period = 20;
+  const slice = values.slice(-period);
+  const middleBand = slice.reduce((sum, value) => sum + value, 0) / period;
+  const variance = slice.reduce((sum, value) => sum + ((value - middleBand) ** 2), 0) / period;
+  const standardDeviation = Math.sqrt(variance);
+  const upperBand = middleBand + (standardDeviation * 2);
+  const lowerBand = middleBand - (standardDeviation * 2);
+
+  return {
+    bollingerUpper: upperBand,
+    bollingerMiddle: middleBand,
+    bollingerLower: lowerBand,
+  };
+}
+
 function calculateAISignal(trend: string | null, ema9: number | null, ema21: number | null, rsi: number | null) {
   const trendIsBullish = trend === "Bullish";
   const trendIsBearish = trend === "Bearish";
@@ -189,6 +212,7 @@ async function fetchTimeframeData(timeframe: TimeframeKey) {
   const ema21 = calculateEMA(closes, 21);
   const rsi = calculateRSI(closes, 14);
   const macd = calculateMACD(closes);
+  const bollinger = calculateBollingerBands(closes);
   const aiSignal = calculateAISignal(close >= open ? "Bullish" : "Bearish", ema9, ema21, rsi);
 
   return {
@@ -204,6 +228,9 @@ async function fetchTimeframeData(timeframe: TimeframeKey) {
       macdLine: Number.isFinite(macd?.macdLine ?? NaN) ? macd?.macdLine : null,
       macdSignal: Number.isFinite(macd?.macdSignal ?? NaN) ? macd?.macdSignal : null,
       macdHistogram: Number.isFinite(macd?.macdHistogram ?? NaN) ? macd?.macdHistogram : null,
+      bollingerUpper: Number.isFinite(bollinger?.bollingerUpper ?? NaN) ? bollinger?.bollingerUpper : null,
+      bollingerMiddle: Number.isFinite(bollinger?.bollingerMiddle ?? NaN) ? bollinger?.bollingerMiddle : null,
+      bollingerLower: Number.isFinite(bollinger?.bollingerLower ?? NaN) ? bollinger?.bollingerLower : null,
       aiSignal,
     },
     status: "ok",

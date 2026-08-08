@@ -58,7 +58,7 @@ async function fetchTimeframeData(timeframe: TimeframeKey) {
     };
   }
 
-  const url = `https://api.twelvedata.com/time_series?symbol=NVDA&interval=${timeframes[timeframe]}&apikey=${encodeURIComponent(apiKey)}&outputsize=1`;
+  const url = `https://api.twelvedata.com/time_series?symbol=NVDA&interval=${timeframes[timeframe]}&apikey=${encodeURIComponent(apiKey)}&outputsize=50`;
   const response = await fetch(url, {
     cache: "no-store",
   });

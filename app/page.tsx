@@ -13,6 +13,8 @@ type MarketFrameData = {
   trend?: string | null;
   support?: number | null;
   resistance?: number | null;
+  ema9?: number | null;
+  ema21?: number | null;
 };
 
 function formatMetricValue(value: number | null | undefined) {
@@ -138,6 +140,18 @@ export default function Home() {
                   <span className="text-sm text-slate-300">Resistance</span>
                   <span className="text-sm font-medium text-slate-100">
                     {formatMetricValue(marketData[timeframe.label]?.resistance)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-3 py-3">
+                  <span className="text-sm text-slate-300">EMA 9</span>
+                  <span className="text-sm font-medium text-slate-100">
+                    {formatMetricValue(marketData[timeframe.label]?.ema9)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-3 py-3">
+                  <span className="text-sm text-slate-300">EMA 21</span>
+                  <span className="text-sm font-medium text-slate-100">
+                    {formatMetricValue(marketData[timeframe.label]?.ema21)}
                   </span>
                 </div>
               </div>

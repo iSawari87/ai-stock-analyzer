@@ -16,6 +16,9 @@ type MarketFrameData = {
   ema9?: number | null;
   ema21?: number | null;
   rsi?: number | null;
+  macdLine?: number | null;
+  macdSignal?: number | null;
+  macdHistogram?: number | null;
   aiSignal?: string | null;
 };
 
@@ -160,6 +163,24 @@ export default function Home() {
                   <span className="text-sm text-slate-300">RSI 14</span>
                   <span className="text-sm font-medium text-slate-100">
                     {formatMetricValue(marketData[timeframe.label]?.rsi)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-3 py-3">
+                  <span className="text-sm text-slate-300">MACD Line</span>
+                  <span className="text-sm font-medium text-slate-100">
+                    {formatMetricValue(marketData[timeframe.label]?.macdLine)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-3 py-3">
+                  <span className="text-sm text-slate-300">MACD Signal</span>
+                  <span className="text-sm font-medium text-slate-100">
+                    {formatMetricValue(marketData[timeframe.label]?.macdSignal)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-3 py-3">
+                  <span className="text-sm text-slate-300">MACD Histogram</span>
+                  <span className="text-sm font-medium text-slate-100">
+                    {formatMetricValue(marketData[timeframe.label]?.macdHistogram)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-3 py-3">

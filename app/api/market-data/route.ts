@@ -23,6 +23,9 @@ function buildPlaceholderResponse(status: string, message: string) {
         ema9: null,
         ema21: null,
         rsi: null,
+        macdLine: null,
+        macdSignal: null,
+        macdHistogram: null,
         aiSignal: null,
       }]),
     ),
@@ -72,6 +75,54 @@ function calculateRSI(values: number[], period: number) {
 
   const rs = averageGain / averageLoss;
   return 100 - (100 / (1 + rs));
+}
+
+function calculateMACD(values: number[]) {
+  if (values.length < 26) {
+    return null;
+  }
+
+  const initialEma12 = values.slice(0, 12).reduce((sum, value) => sum + value, 0) / 12;
+  const initialEma26 = values.slice(0, 26).reduce((sum, value) => sum + value, 0) / 26;
+  const multiplier12 = 2 / (12 + 1);
+  const multiplier26 = 2 / (26 + 1);
+
+  const ema12Series = [] as number[];
+  const ema26Series = [] as number[];
+
+  let ema12Value = initialEma12;
+  let ema26Value = initialEma26;
+
+  for (let index = 0; index < values.length; index += 1) {
+    const value = values[index];
+
+    if (index === 0) {
+      ema12Series.push(initialEma12);
+      ema26Series.push(initialEma26);
+      continue;
+    }
+
+    ema12Value = (value * multiplier12) + (ema12Value * (1 - multiplier12));
+    ema26Value = (value * multiplier26) + (ema26Value * (1 - multiplier26));
+    ema12Series.push(ema12Value);
+    ema26Series.push(ema26Value);
+  }
+
+  const macdLineSeries = ema12Series.map((value, index) => value - (ema26Series[index] ?? value));
+
+  if (macdLineSeries.length < 9) {
+    return null;
+  }
+
+  const macdLine = macdLineSeries[macdLineSeries.length - 1];
+  const signalLine = calculateEMA(macdLineSeries, 9);
+  const histogram = typeof signalLine === "number" ? macdLine - signalLine : null;
+
+  return {
+    macdLine,
+    macdSignal: signalLine,
+    macdHistogram: histogram,
+  };
 }
 
 function calculateAISignal(trend: string | null, ema9: number | null, ema21: number | null, rsi: number | null) {
@@ -137,6 +188,7 @@ async function fetchTimeframeData(timeframe: TimeframeKey) {
   const ema9 = calculateEMA(closes, 9);
   const ema21 = calculateEMA(closes, 21);
   const rsi = calculateRSI(closes, 14);
+  const macd = calculateMACD(closes);
   const aiSignal = calculateAISignal(close >= open ? "Bullish" : "Bearish", ema9, ema21, rsi);
 
   return {
@@ -149,6 +201,9 @@ async function fetchTimeframeData(timeframe: TimeframeKey) {
       ema9: Number.isFinite(ema9 ?? NaN) ? ema9 : null,
       ema21: Number.isFinite(ema21 ?? NaN) ? ema21 : null,
       rsi: Number.isFinite(rsi ?? NaN) ? rsi : null,
+      macdLine: Number.isFinite(macd?.macdLine ?? NaN) ? macd?.macdLine : null,
+      macdSignal: Number.isFinite(macd?.macdSignal ?? NaN) ? macd?.macdSignal : null,
+      macdHistogram: Number.isFinite(macd?.macdHistogram ?? NaN) ? macd?.macdHistogram : null,
       aiSignal,
     },
     status: "ok",

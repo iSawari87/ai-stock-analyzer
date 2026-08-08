@@ -29,6 +29,7 @@ function buildPlaceholderResponse(status: string, message: string) {
         bollingerUpper: null,
         bollingerMiddle: null,
         bollingerLower: null,
+        vwap: null,
         aiSignal: null,
       }]),
     ),
@@ -148,6 +149,33 @@ function calculateBollingerBands(values: number[]) {
   };
 }
 
+function calculateVWAP(values: Array<{ close?: string | number | null; volume?: string | number | null }>) {
+  if (!Array.isArray(values) || values.length === 0) {
+    return null;
+  }
+
+  let totalVolume = 0;
+  let totalVolumePrice = 0;
+
+  for (const entry of values) {
+    const price = Number(entry.close);
+    const volume = Number(entry.volume);
+
+    if (!Number.isFinite(price) || !Number.isFinite(volume) || volume <= 0) {
+      continue;
+    }
+
+    totalVolume += volume;
+    totalVolumePrice += price * volume;
+  }
+
+  if (totalVolume === 0) {
+    return null;
+  }
+
+  return totalVolumePrice / totalVolume;
+}
+
 function calculateAISignal(trend: string | null, ema9: number | null, ema21: number | null, rsi: number | null) {
   const trendIsBullish = trend === "Bullish";
   const trendIsBearish = trend === "Bearish";
@@ -203,6 +231,7 @@ async function fetchTimeframeData(timeframe: TimeframeKey) {
   const closes = values
     .map((entry: { close?: string | number | null }) => Number(entry.close))
     .filter((value: number) => Number.isFinite(value));
+  const vwap = calculateVWAP(values as Array<{ close?: string | number | null; volume?: string | number | null }>);
 
   const close = Number(latest.close);
   const open = Number(latest.open);
@@ -231,6 +260,7 @@ async function fetchTimeframeData(timeframe: TimeframeKey) {
       bollingerUpper: Number.isFinite(bollinger?.bollingerUpper ?? NaN) ? bollinger?.bollingerUpper : null,
       bollingerMiddle: Number.isFinite(bollinger?.bollingerMiddle ?? NaN) ? bollinger?.bollingerMiddle : null,
       bollingerLower: Number.isFinite(bollinger?.bollingerLower ?? NaN) ? bollinger?.bollingerLower : null,
+      vwap: Number.isFinite(vwap ?? NaN) ? vwap : null,
       aiSignal,
     },
     status: "ok",

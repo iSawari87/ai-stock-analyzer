@@ -30,6 +30,7 @@ function buildPlaceholderResponse(status: string, message: string) {
         bollingerMiddle: null,
         bollingerLower: null,
         vwap: null,
+        atr14: null,
         aiSignal: null,
       }]),
     ),
@@ -176,6 +177,38 @@ function calculateVWAP(values: Array<{ close?: string | number | null; volume?: 
   return totalVolumePrice / totalVolume;
 }
 
+function calculateATR14(values: Array<{ high?: string | number | null; low?: string | number | null; close?: string | number | null }>) {
+  if (!Array.isArray(values) || values.length < 2) {
+    return null;
+  }
+
+  const trueRanges: number[] = [];
+
+  for (let index = 1; index < values.length; index += 1) {
+    const previousClose = Number(values[index - 1]?.close);
+    const currentHigh = Number(values[index]?.high);
+    const currentLow = Number(values[index]?.low);
+
+    if (!Number.isFinite(previousClose) || !Number.isFinite(currentHigh) || !Number.isFinite(currentLow)) {
+      continue;
+    }
+
+    const range1 = currentHigh - currentLow;
+    const range2 = Math.abs(currentHigh - previousClose);
+    const range3 = Math.abs(currentLow - previousClose);
+    trueRanges.push(Math.max(range1, range2, range3));
+  }
+
+  if (trueRanges.length < 14) {
+    return null;
+  }
+
+  const recentRanges = trueRanges.slice(-14);
+  const average = recentRanges.reduce((sum, value) => sum + value, 0) / recentRanges.length;
+
+  return average;
+}
+
 function calculateAISignal(trend: string | null, ema9: number | null, ema21: number | null, rsi: number | null) {
   const trendIsBullish = trend === "Bullish";
   const trendIsBearish = trend === "Bearish";
@@ -232,6 +265,7 @@ async function fetchTimeframeData(timeframe: TimeframeKey) {
     .map((entry: { close?: string | number | null }) => Number(entry.close))
     .filter((value: number) => Number.isFinite(value));
   const vwap = calculateVWAP(values as Array<{ close?: string | number | null; volume?: string | number | null }>);
+  const atr14 = calculateATR14(values as Array<{ high?: string | number | null; low?: string | number | null; close?: string | number | null }>);
 
   const close = Number(latest.close);
   const open = Number(latest.open);
@@ -261,6 +295,7 @@ async function fetchTimeframeData(timeframe: TimeframeKey) {
       bollingerMiddle: Number.isFinite(bollinger?.bollingerMiddle ?? NaN) ? bollinger?.bollingerMiddle : null,
       bollingerLower: Number.isFinite(bollinger?.bollingerLower ?? NaN) ? bollinger?.bollingerLower : null,
       vwap: Number.isFinite(vwap ?? NaN) ? vwap : null,
+      atr14: Number.isFinite(atr14 ?? NaN) ? atr14 : null,
       aiSignal,
     },
     status: "ok",

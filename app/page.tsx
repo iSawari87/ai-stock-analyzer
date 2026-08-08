@@ -22,6 +22,8 @@ type MarketFrameData = {
   bollingerUpper?: number | null;
   bollingerMiddle?: number | null;
   bollingerLower?: number | null;
+  vwap?: number | null;
+  atr14?: number | null;
   aiSignal?: string | null;
 };
 
@@ -202,6 +204,18 @@ export default function Home() {
                   <span className="text-sm text-slate-300">Bollinger Lower</span>
                   <span className="text-sm font-medium text-slate-100">
                     {formatMetricValue(marketData[timeframe.label]?.bollingerLower)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-3 py-3">
+                  <span className="text-sm text-slate-300">VWAP</span>
+                  <span className="text-sm font-medium text-slate-100">
+                    {formatMetricValue(marketData[timeframe.label]?.vwap)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-3 py-3">
+                  <span className="text-sm text-slate-300">ATR 14</span>
+                  <span className="text-sm font-medium text-slate-100">
+                    {formatMetricValue(marketData[timeframe.label]?.atr14)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-3 py-3">

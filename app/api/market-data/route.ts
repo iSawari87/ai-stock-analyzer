@@ -46,6 +46,34 @@ function calculateEMA(values: number[], period: number) {
   return ema;
 }
 
+function calculateRSI(values: number[], period: number) {
+  if (values.length < period + 1) {
+    return null;
+  }
+
+  let gains = 0;
+  let losses = 0;
+
+  for (let index = 1; index <= period; index += 1) {
+    const change = values[index] - values[index - 1];
+    if (change >= 0) {
+      gains += change;
+    } else {
+      losses -= change;
+    }
+  }
+
+  const averageGain = gains / period;
+  const averageLoss = losses / period;
+
+  if (averageLoss === 0) {
+    return 100;
+  }
+
+  const rs = averageGain / averageLoss;
+  return 100 - (100 / (1 + rs));
+}
+
 async function fetchTimeframeData(timeframe: TimeframeKey) {
   const apiKey = process.env.TWELVE_DATA_API_KEY?.trim();
 
@@ -85,6 +113,7 @@ async function fetchTimeframeData(timeframe: TimeframeKey) {
   const low = Number(latest.low);
   const ema9 = calculateEMA(closes, 9);
   const ema21 = calculateEMA(closes, 21);
+  const rsi = calculateRSI(closes, 14);
 
   return {
     timeframe,
@@ -95,7 +124,7 @@ async function fetchTimeframeData(timeframe: TimeframeKey) {
       resistance: Number.isFinite(high) ? high : null,
       ema9: Number.isFinite(ema9 ?? NaN) ? ema9 : null,
       ema21: Number.isFinite(ema21 ?? NaN) ? ema21 : null,
-      rsi: null,
+      rsi: Number.isFinite(rsi ?? NaN) ? rsi : null,
       aiSignal: close >= open ? "Bullish bias" : "Bearish bias",
     },
     status: "ok",

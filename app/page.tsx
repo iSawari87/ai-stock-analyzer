@@ -34,6 +34,23 @@ export default function Home() {
           </div>
         </section>
 
+        <section className="rounded-3xl border border-white/10 bg-slate-950/70 p-4 shadow-lg shadow-black/30">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold">NVDA Chart</h2>
+              <p className="text-sm text-slate-400">TradingView overview</p>
+            </div>
+          </div>
+          <div className="overflow-hidden rounded-2xl border border-white/10">
+            <iframe
+              title="NVDA TradingView Chart"
+              src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_nvda&symbol=NASDAQ%3ANVDA&interval=15&theme=dark&style=1&locale=en&toolbarbg=transparent&studies=%5B%5D"
+              className="h-[420px] w-full"
+              loading="lazy"
+            />
+          </div>
+        </section>
+
         <section className="grid gap-4 lg:grid-cols-3">
           {timeframes.map((timeframe, index) => (
             <article

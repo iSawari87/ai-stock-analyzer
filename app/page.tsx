@@ -16,6 +16,7 @@ type MarketFrameData = {
   ema9?: number | null;
   ema21?: number | null;
   rsi?: number | null;
+  aiSignal?: string | null;
 };
 
 function formatMetricValue(value: number | null | undefined) {
@@ -159,6 +160,12 @@ export default function Home() {
                   <span className="text-sm text-slate-300">RSI 14</span>
                   <span className="text-sm font-medium text-slate-100">
                     {formatMetricValue(marketData[timeframe.label]?.rsi)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-3 py-3">
+                  <span className="text-sm text-slate-300">AI Signal</span>
+                  <span className="text-sm font-medium text-slate-100">
+                    {marketData[timeframe.label]?.aiSignal ?? "—"}
                   </span>
                 </div>
               </div>

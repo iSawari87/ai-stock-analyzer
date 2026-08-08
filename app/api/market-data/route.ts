@@ -74,6 +74,29 @@ function calculateRSI(values: number[], period: number) {
   return 100 - (100 / (1 + rs));
 }
 
+function calculateAISignal(trend: string | null, ema9: number | null, ema21: number | null, rsi: number | null) {
+  const trendIsBullish = trend === "Bullish";
+  const trendIsBearish = trend === "Bearish";
+  const emaBullish = typeof ema9 === "number" && typeof ema21 === "number" && ema9 >= ema21;
+  const emaBearish = typeof ema9 === "number" && typeof ema21 === "number" && ema9 < ema21;
+  const rsiValue = typeof rsi === "number" ? rsi : null;
+  const rsiBullish = typeof rsiValue === "number" && rsiValue > 50;
+  const rsiBearish = typeof rsiValue === "number" && rsiValue < 50;
+
+  const bullishSignals = Number(trendIsBullish) + Number(emaBullish) + Number(rsiBullish);
+  const bearishSignals = Number(trendIsBearish) + Number(emaBearish) + Number(rsiBearish);
+
+  if (bullishSignals > bearishSignals) {
+    return "Bullish";
+  }
+
+  if (bearishSignals > bullishSignals) {
+    return "Bearish";
+  }
+
+  return "Neutral";
+}
+
 async function fetchTimeframeData(timeframe: TimeframeKey) {
   const apiKey = process.env.TWELVE_DATA_API_KEY?.trim();
 
@@ -114,6 +137,7 @@ async function fetchTimeframeData(timeframe: TimeframeKey) {
   const ema9 = calculateEMA(closes, 9);
   const ema21 = calculateEMA(closes, 21);
   const rsi = calculateRSI(closes, 14);
+  const aiSignal = calculateAISignal(close >= open ? "Bullish" : "Bearish", ema9, ema21, rsi);
 
   return {
     timeframe,
@@ -125,7 +149,7 @@ async function fetchTimeframeData(timeframe: TimeframeKey) {
       ema9: Number.isFinite(ema9 ?? NaN) ? ema9 : null,
       ema21: Number.isFinite(ema21 ?? NaN) ? ema21 : null,
       rsi: Number.isFinite(rsi ?? NaN) ? rsi : null,
-      aiSignal: close >= open ? "Bullish bias" : "Bearish bias",
+      aiSignal,
     },
     status: "ok",
     message: "Market data retrieved successfully.",
